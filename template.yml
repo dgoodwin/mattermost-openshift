@@ -1,0 +1,229 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: mattermost
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    generation: 1
+    name: mattermost
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: 172.30.94.234:5000/mattermost/mattermost:latest
+      generation: null
+      importPolicy: {}
+      name: latest
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: mattermost
+    name: mattermost
+  spec:
+    replicas: 1
+    selector:
+      app: mattermost
+      deploymentconfig: mattermost
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/container.mattermost.image.entrypoint: '["/bin/sh","-c","/docker-entry.sh"]'
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mattermost
+          deploymentconfig: mattermost
+      spec:
+        containers:
+        - image: 172.30.94.234:5000/mattermost/mattermost@sha256:b8831c015037a6445351622ef9d1fe828d3f6eee5d0f7e3d97cc4325d6713663
+          imagePullPolicy: Always
+          name: mattermost
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - mattermost
+        from:
+          kind: ImageStreamTag
+          name: mattermost:latest
+          namespace: mattermost
+      type: ImageChange
+  status: {}
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      openshift.io/deployer-pod.name: mattermost-1-deploy
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: mattermost
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: "1"
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"mattermost","namespace":"mattermost","selfLink":"/oapi/v1/namespaces/mattermost/deploymentconfigs/mattermost","uid":"bab2d3fc-12c8-11e6-8143-0ada84b8265d","resourceVersion":"4309004","creationTimestamp":"2016-05-05T13:53:21Z","labels":{"app":"mattermost"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{}},"triggers":[{"type":"ConfigChange"},{"type":"ImageChange","imageChangeParams":{"automatic":true,"containerNames":["mattermost"],"from":{"kind":"ImageStreamTag","namespace":"mattermost","name":"mattermost:latest"},"lastTriggeredImage":"172.30.94.234:5000/mattermost/mattermost@sha256:b8831c015037a6445351622ef9d1fe828d3f6eee5d0f7e3d97cc4325d6713663"}}],"replicas":1,"test":false,"selector":{"app":"mattermost","deploymentconfig":"mattermost"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"mattermost","deploymentconfig":"mattermost"},"annotations":{"openshift.io/container.mattermost.image.entrypoint":"[\"/bin/sh\",\"-c\",\"/docker-entry.sh\"]","openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"containers":[{"name":"mattermost","image":"172.30.94.234:5000/mattermost/mattermost@sha256:b8831c015037a6445351622ef9d1fe828d3f6eee5d0f7e3d97cc4325d6713663","ports":[{"containerPort":80,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"Always"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{}}}},"status":{"latestVersion":1,"details":{"causes":[{"type":"ConfigChange"}]}}}
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mattermost
+      openshift.io/deployment-config.name: mattermost
+    name: mattermost-1
+  spec:
+    replicas: 1
+    selector:
+      app: mattermost
+      deployment: mattermost-1
+      deploymentconfig: mattermost
+    template:
+      metadata:
+        annotations:
+          openshift.io/container.mattermost.image.entrypoint: '["/bin/sh","-c","/docker-entry.sh"]'
+          openshift.io/deployment-config.latest-version: "1"
+          openshift.io/deployment-config.name: mattermost
+          openshift.io/deployment.name: mattermost-1
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mattermost
+          deployment: mattermost-1
+          deploymentconfig: mattermost
+      spec:
+        containers:
+        - image: 172.30.94.234:5000/mattermost/mattermost@sha256:b8831c015037a6445351622ef9d1fe828d3f6eee5d0f7e3d97cc4325d6713663
+          imagePullPolicy: Always
+          name: mattermost
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: mattermost
+    name: mattermost
+  spec:
+    ports:
+    - name: 80-tcp
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      app: mattermost
+      deploymentconfig: mattermost
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"ReplicationController","namespace":"mattermost","name":"mattermost-1","uid":"bad75987-12c8-11e6-9f75-0a1d348c34bb","apiVersion":"v1","resourceVersion":"4309032"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container mattermost; cpu, memory limit for container mattermost'
+      openshift.io/container.mattermost.image.entrypoint: '["/bin/sh","-c","/docker-entry.sh"]'
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: mattermost
+      openshift.io/deployment.name: mattermost-1
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: mattermost-1-
+    labels:
+      app: mattermost
+      deployment: mattermost-1
+      deploymentconfig: mattermost
+  spec:
+    containers:
+    - image: 172.30.94.234:5000/mattermost/mattermost@sha256:b8831c015037a6445351622ef9d1fe828d3f6eee5d0f7e3d97cc4325d6713663
+      imagePullPolicy: Always
+      name: mattermost
+      ports:
+      - containerPort: 80
+        protocol: TCP
+      resources:
+        limits:
+          cpu: "1"
+          memory: 512Mi
+        requests:
+          cpu: 60m
+          memory: 307Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+          - SYS_CHROOT
+        privileged: false
+        runAsUser: 1000930000
+        seLinuxOptions:
+          level: s0:c31,c0
+      terminationMessagePath: /dev/termination-log
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-1p17f
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    host: ip-172-31-14-20.ec2.internal
+    imagePullSecrets:
+    - name: default-dockercfg-ravx4
+    nodeName: ip-172-31-14-20.ec2.internal
+    nodeSelector:
+      type: compute
+    restartPolicy: Always
+    securityContext:
+      fsGroup: 1000930000
+      seLinuxOptions:
+        level: s0:c31,c0
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - name: default-token-1p17f
+      secret:
+        secretName: default-token-1p17f
+  status:
+    phase: Pending
